@@ -1,0 +1,13 @@
+image: gitpod/workspace-full
+
+tasks:
+  - name: Start JupyterLab
+    init: pip install -r requirements.txt
+    command:
+      gp timeout extend;
+      jupyter lab --port 8888 --ServerApp.token='' --ServerApp.allow_remote_access=true --no-browser
+
+ports:
+  - name: JupyterLab
+    port: 8888
+    onOpen: notify
