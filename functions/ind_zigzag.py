@@ -4,18 +4,19 @@ def calculate_zigzag(data, deviation_percent, pivot_legs):
     times = []
     prices = []
     trends = []  
-    last_pivot_index = 0
-    last_pivot_price = data['Low'][0]
-    trend = 0
     retraces = []  # Initialise with None for the first two entries to align with retracement calculation
 
+    last_pivot_index = 0
+    last_pivot_price = data['Low'].iloc[0]
+    trend = 0
+
     for i in range(pivot_legs, len(data) - pivot_legs):
-        high = data['High'][i]
-        low = data['Low'][i]
+        high = data['High'].iloc[i]
+        low = data['Low'].iloc[i]
         time = data.index[i]
 
         if high >= last_pivot_price * (1 + deviation_percent / 100):
-            if all(high >= data['High'][j] for j in range(i - pivot_legs, i + pivot_legs + 1)):
+            if all(high >= data['High'].iloc[j] for j in range(i - pivot_legs, i + pivot_legs + 1)):
                 if trend == 1:
                     times[-1] = time
                     prices[-1] = high
@@ -29,7 +30,7 @@ def calculate_zigzag(data, deviation_percent, pivot_legs):
                 trend = 1
 
         if low <= last_pivot_price * (1 - deviation_percent / 100):
-            if all(low <= data['Low'][j] for j in range(i - pivot_legs, i + pivot_legs + 1)):
+            if all(low <= data['Low'].iloc[j] for j in range(i - pivot_legs, i + pivot_legs + 1)):
                 if trend == -1:
                     times[-1] = time
                     prices[-1] = low
@@ -49,8 +50,8 @@ def calculate_zigzag(data, deviation_percent, pivot_legs):
 
     # Evaluate the remaining data for a potential pivot
     for i in range(last_pivot_index + 1, len(data)):
-        high = data['High'][i]
-        low = data['Low'][i]
+        high = data['High'].iloc[i]
+        low = data['Low'].iloc[i]
         time = data.index[i]
 
         if trend == 1 and high >= last_pivot_price * (1 + deviation_percent / 100):
