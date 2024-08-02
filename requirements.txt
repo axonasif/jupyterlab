@@ -2,6 +2,6 @@ jupyterlab==4.2.4
 numpy==2.0.1
 matplotlib==3.9.1
 pandas==2.2.2
-request
+requests
 pytz
 plotly==5.23.0
