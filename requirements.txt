@@ -3,4 +3,4 @@ numpy==2.0.1
 matplotlib==3.9.1
 pandas==2.2.2
 ccxt==4.3.27
-dotenv==0.0.5
+dotenv
