@@ -1,10 +1,47 @@
 image: gitpod/workspace-full
 
 tasks:
+  - name: "Heartbeat" for Jupyter
+    command: |
+      (
+      set -eu
+
+      # Ideally, you may install it from the dockerfile.
+      command -v tcpdump || sudo sh -c 'apt-get update -yq && apt-get install -yq tcpdump'
+
+      # User vars: You may modify these
+      TIMEOUT_MINUTES=30
+      MONITORING_PORT=8888 # Jupyter port
+      LOG_FILE=/tmp/.tcpd.log
+
+      # Start tcpdump
+      exec {writelog}> "$LOG_FILE" {readlog}< "$LOG_FILE"
+      sudo tcpdump -l -qn -i eth0 "tcp port $MONITORING_PORT and tcp[tcpflags] == tcp-syn" >&${writelog} &
+      trap "sudo kill -15 $!; exit" SIGINT SIGTERM EXIT
+
+      # Set initial (incrementing) timeout
+      ts=$((TIMEOUT_MINUTES * 60))
+      declare -i t=$ts
+      gp timeout set ${t}s
+
+      # Check heartbeat after every 80% of $TIMEOUT_MINUTES (ts)
+      exec {sleep}<> <(:); until read -t $((ts - (ts * 20 / 100))) -u $sleep; do
+          IFS='' read -rd '' new_logs <&${readlog} || :;
+          > "$LOG_FILE" # Truncate the log file
+          if test -n "${new_logs:-}"; then {
+              t+=$ts # Increment timeout with TIMEOUT_MINUTES
+              gp timeout set ${t}s
+          } else {
+              echo "Heartbeat stopped"
+              gp stop &
+              break
+          } fi
+      done
+      )
+
   - name: Start JupyterLab
-    init: pip install -r requirements.txt
+    before: pip install -r requirements.txt
     command:
-      gp timeout extend;
       jupyter lab --port 8888 --ServerApp.token='' --ServerApp.allow_remote_access=true --no-browser
 
 ports:
