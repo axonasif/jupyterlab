@@ -1,7 +1,7 @@
 image: gitpod/workspace-full
 
 tasks:
-  - name: "Heartbeat" for Jupyter
+  - name: Heartbeat for Jupyter
     command: |
       (
       set -eu
